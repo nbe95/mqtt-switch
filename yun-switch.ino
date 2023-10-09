@@ -1,26 +1,105 @@
+#include <ArduinoJson.h>
+#include <Bridge.h>
+#include <Process.h>
+#include <PubSubClient.h>
 #include <Servo.h>
+#include <YunClient.h>
 
+
+#define SW_VERSION              "yun-switch@" __TIMESTAMP__
+
+#define MQTT_BROKER             IPAddress(192, 168, 1, 20)
+#define MQTT_PORT               1883
+#define MQTT_BASE_TOPIC         "yun-switch"
+#define MQTT_STATUS_TOPIC       MQTT_BASE_TOPIC "/status"
+#define MQTT_COMMAND_TOPIC      MQTT_BASE_TOPIC "/command"
+#define MQTT_RESPONSE_TOPIC     MQTT_BASE_TOPIC "/response"
+
+#define SERVO_PIN               6
+#define SERVO_POS_TOP_DEG       70
+#define SERVO_POS_NEUTRAL_DEG   90
+#define SERVO_POS_BOTTOM_DEG    110
+
+
+YunClient yun_client;
+PubSubClient mqtt_client(MQTT_BROKER, MQTT_PORT, yun_client);
 Servo motor;
+DynamicJsonDocument json_buffer(100);
 
-const int SERVO_PIN = 6;
-
-const int SERVO_POS_TOP_DEG = 70;
-const int SERVO_POS_NEUTRAL_DEG = 90;
-const int SERVO_POS_BOTTOM_DEG = 110;
 
 void setup() {
+    Bridge.begin();
+    Serial.begin(115200);
+    Serial.println(F("Starting yun-switch sketch."));
+
+    mqtt_client.setCallback(onMsgReceived);
+
     motor.attach(SERVO_PIN);
     motor.write(SERVO_POS_NEUTRAL_DEG);
-    delay(5000);
 }
 
 void loop() {
-    motor.write(SERVO_POS_TOP_DEG);
-    delay(1000);
+    mqttReconnect();
+    mqtt_client.loop();
+}
 
-    motor.write(SERVO_POS_NEUTRAL_DEG);
-    delay(1000);
+void onMsgReceived(char* topic, byte* payload, unsigned int length) {
+    Serial.print(F("MQTT message with "));
+    Serial.print(length);
+    Serial.print(F(" bytes received on topic "));
+    Serial.println(topic);
 
-    motor.write(SERVO_POS_BOTTOM_DEG);
-    delay(1000);
+    if (strcasecmp(topic, MQTT_COMMAND_TOPIC) == 0) {
+        deserializeJson(json_buffer, payload, length);
+        const char* state = json_buffer["state"];
+
+        Serial.println(state);
+
+        if (strcasecmp(state, "on") == 0) {
+            Serial.println(F("Turning servo to position 'top'."));
+            motor.write(SERVO_POS_TOP_DEG);
+        }
+        if (strcasecmp(state, "off") == 0) {
+            Serial.println(F("Turning servo to position 'bottom'."));
+            motor.write(SERVO_POS_BOTTOM_DEG);
+        }
+
+        json_buffer.clear();
+        json_buffer["state"] = "unknown";
+        json_buffer["version"] = SW_VERSION;
+
+        char payload[100];
+        serializeJson(json_buffer, payload);
+        mqtt_client.publish(MQTT_RESPONSE_TOPIC, payload);
+    }
+}
+
+void onMqttConnected() {
+    json_buffer.clear();
+    json_buffer["info"] = F("connected");
+    json_buffer["version"] = SW_VERSION;
+
+    char payload[100];
+    serializeJson(json_buffer, payload);
+
+    mqtt_client.publish(MQTT_STATUS_TOPIC, payload);
+
+    Serial.print(F("Connected to MQTT broker. Subscribing to topic "));
+    Serial.println(MQTT_COMMAND_TOPIC);
+    mqtt_client.subscribe(MQTT_COMMAND_TOPIC);
+}
+
+void mqttReconnect() {
+    while (!mqtt_client.connected()) {
+        Serial.print(F("Attempting MQTT connection... "));
+        if (mqtt_client.connect("yun-switch")) {
+            Serial.println(F("connected!"));
+            onMqttConnected();
+        } else {
+            Serial.print(F("failed! rc="));
+            Serial.print(mqtt_client.state());
+            Serial.println(F(" Trying again in 5 seconds."));
+            delay(5000);
+        }
+    }
 }
