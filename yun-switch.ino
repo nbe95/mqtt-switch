@@ -16,8 +16,7 @@
 #define MQTT_BASE_TOPIC         "yun-switch"
 #define MQTT_STATUS_TOPIC       MQTT_BASE_TOPIC "/status"
 #define MQTT_COMMAND_TOPIC      MQTT_BASE_TOPIC "/command"
-#define MQTT_RESPONSE_TOPIC     MQTT_BASE_TOPIC "/response"
-#define MQTT_UPDATE_TIME_MS     1000u * 60 * 15
+#define MQTT_UPDATE_TIME_MS     1000ul * 60 * 15
 
 #define SERVO_PIN               6
 #define SERVO_POS_TOP_DEG       135
@@ -50,6 +49,7 @@ void loop() {
     mqtt_client.loop();
     state_machine.loop();
 
+    update_timer.start();
     if (state_machine.hasPosChanged() || update_timer.checkAndRestart()) {
         sendMqttUpdate();
         update_timer.restart();
@@ -106,22 +106,16 @@ void sendMqttUpdate() {
 
     char payload[100];
     serializeJson(json_buffer, payload);
-    mqtt_client.publish(MQTT_RESPONSE_TOPIC, payload);
+    mqtt_client.publish(MQTT_STATUS_TOPIC, payload);
 }
 
 void onMqttConnected() {
-    json_buffer.clear();
-    json_buffer["info"] = F("connected");
-    json_buffer["version"] = SW_VERSION;
-
-    char payload[100];
-    serializeJson(json_buffer, payload);
-
-    mqtt_client.publish(MQTT_STATUS_TOPIC, payload);
-
     Serial.print(F("Connected to MQTT broker. Subscribing to topic "));
     Serial.println(MQTT_COMMAND_TOPIC);
     mqtt_client.subscribe(MQTT_COMMAND_TOPIC);
+
+    sendMqttUpdate();
+    update_timer.restart();
 }
 
 void mqttReconnect() {
