@@ -6,6 +6,7 @@
 #include <YunClient.h>
 
 #include "./src/state_machine.h"
+#include "./src/timer.h"
 
 
 #define SW_VERSION              "yun-switch@" __TIMESTAMP__
@@ -16,19 +17,21 @@
 #define MQTT_STATUS_TOPIC       MQTT_BASE_TOPIC "/status"
 #define MQTT_COMMAND_TOPIC      MQTT_BASE_TOPIC "/command"
 #define MQTT_RESPONSE_TOPIC     MQTT_BASE_TOPIC "/response"
+#define MQTT_UPDATE_TIME_MS     1000u * 60 * 15
 
 #define SERVO_PIN               6
-#define SERVO_POS_TOP_DEG       45
+#define SERVO_POS_TOP_DEG       135
 #define SERVO_POS_NEUTRAL_DEG   90
-#define SERVO_POS_BOTTOM_DEG    135
+#define SERVO_POS_BOTTOM_DEG    45
 
 
 YunClient           yun_client;
 PubSubClient        mqtt_client(MQTT_BROKER, MQTT_PORT, yun_client);
 MotorStateMachine   state_machine(
-    SERVO_PIN, SERVO_POS_NEUTRAL_DEG, SERVO_POS_TOP_DEG, SERVO_POS_TOP_DEG
+    SERVO_PIN, SERVO_POS_NEUTRAL_DEG, SERVO_POS_TOP_DEG, SERVO_POS_BOTTOM_DEG
 );
 DynamicJsonDocument json_buffer(100);
+Timer               update_timer(MQTT_UPDATE_TIME_MS);
 MotorStateMachine::Position latest_cmd = MotorStateMachine::Position::NEUTRAL;
 
 
@@ -47,8 +50,9 @@ void loop() {
     mqtt_client.loop();
     state_machine.loop();
 
-    if (state_machine.hasPosChanged()) {
-        onPosChanged(state_machine.getPos());
+    if (state_machine.hasPosChanged() || update_timer.checkAndRestart()) {
+        sendMqttUpdate();
+        update_timer.restart();
     }
 
 }
@@ -65,12 +69,12 @@ void onMsgReceived(char* topic, byte* payload, unsigned int length) {
 
         Serial.println(state);
 
-        if (strcasecmp(state, "on") == 0) {
+        if (strcasecmp(state, "top") == 0) {
             Serial.println(F("Turning servo to position 'top'."));
             state_machine.setPos(MotorStateMachine::Position::TOP);
             latest_cmd = MotorStateMachine::Position::TOP;
         }
-        if (strcasecmp(state, "off") == 0) {
+        if (strcasecmp(state, "bottom") == 0) {
             Serial.println(F("Turning servo to position 'bottom'."));
             state_machine.setPos(MotorStateMachine::Position::BOTTOM);
             latest_cmd = MotorStateMachine::Position::BOTTOM;
@@ -78,11 +82,11 @@ void onMsgReceived(char* topic, byte* payload, unsigned int length) {
     }
 }
 
-void onPosChanged(MotorStateMachine::Position pos) {
+void sendMqttUpdate() {
     json_buffer.clear();
     json_buffer["state"] = "neutral";
     json_buffer["latest_cmd"] = "unknown";
-    switch (pos) {
+    switch (state_machine.getPos()) {
         case MotorStateMachine::Position::TOP:
             json_buffer["state"] = "top";
             break;
