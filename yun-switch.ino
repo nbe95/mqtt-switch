@@ -5,6 +5,8 @@
 #include <Servo.h>
 #include <YunClient.h>
 
+#include "./src/state_machine.h"
+
 
 #define SW_VERSION              "yun-switch@" __TIMESTAMP__
 
@@ -16,14 +18,16 @@
 #define MQTT_RESPONSE_TOPIC     MQTT_BASE_TOPIC "/response"
 
 #define SERVO_PIN               6
-#define SERVO_POS_TOP_DEG       70
+#define SERVO_POS_TOP_DEG       45
 #define SERVO_POS_NEUTRAL_DEG   90
-#define SERVO_POS_BOTTOM_DEG    110
+#define SERVO_POS_BOTTOM_DEG    135
 
 
-YunClient yun_client;
-PubSubClient mqtt_client(MQTT_BROKER, MQTT_PORT, yun_client);
-Servo motor;
+YunClient           yun_client;
+PubSubClient        mqtt_client(MQTT_BROKER, MQTT_PORT, yun_client);
+MotorStateMachine   state_machine(
+    SERVO_PIN, SERVO_POS_NEUTRAL_DEG, SERVO_POS_TOP_DEG, SERVO_POS_TOP_DEG
+);
 DynamicJsonDocument json_buffer(100);
 
 
@@ -33,14 +37,12 @@ void setup() {
     Serial.println(F("Starting yun-switch sketch."));
 
     mqtt_client.setCallback(onMsgReceived);
-
-    motor.attach(SERVO_PIN);
-    motor.write(SERVO_POS_NEUTRAL_DEG);
 }
 
 void loop() {
     mqttReconnect();
     mqtt_client.loop();
+    state_machine.process();
 }
 
 void onMsgReceived(char* topic, byte* payload, unsigned int length) {
@@ -57,11 +59,11 @@ void onMsgReceived(char* topic, byte* payload, unsigned int length) {
 
         if (strcasecmp(state, "on") == 0) {
             Serial.println(F("Turning servo to position 'top'."));
-            motor.write(SERVO_POS_TOP_DEG);
+            state_machine.setPos(MotorStateMachine::Position::TOP);
         }
         if (strcasecmp(state, "off") == 0) {
             Serial.println(F("Turning servo to position 'bottom'."));
-            motor.write(SERVO_POS_BOTTOM_DEG);
+            state_machine.setPos(MotorStateMachine::Position::BOTTOM);
         }
 
         json_buffer.clear();
