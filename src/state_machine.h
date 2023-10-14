@@ -10,10 +10,14 @@ class MotorStateMachine {
  public:
     enum Position { NEUTRAL, TOP, BOTTOM };
 
-                MotorStateMachine(const int, const int, const int, const int);
+    MotorStateMachine(const int, const int, const int, const int);
 
-    void        setPos(const Position);
-    void        process();
+    void        setup();
+    void        loop();
+
+    bool        setPos(const Position);
+    Position    getPos() const { return m_current_pos; }
+    bool        hasPosChanged();
 
  protected:
     enum State {
@@ -24,7 +28,9 @@ class MotorStateMachine {
         SWITCH_NEUTRAL,
         DETACHED
     }           m_state = State::INIT;
-    Position    m_next_pos = Position::NEUTRAL;
+    Position    m_current_pos = Position::NEUTRAL;
+    Position    m_target_pos = Position::NEUTRAL;
+    bool        m_pos_changed = false;
 
     Servo       m_servo;
     const int   m_pin;

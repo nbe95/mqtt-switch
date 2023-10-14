@@ -17,16 +17,14 @@ MotorStateMachine::MotorStateMachine(
 m_pin(pin),
 m_neutral_deg(neutral_deg),
 m_top_deg(top_deg),
-m_bottom_deg(bottom_deg) {
+m_bottom_deg(bottom_deg) {}
+
+void MotorStateMachine::setup() {
     m_servo.attach(m_pin);
     m_servo.write(m_neutral_deg);
 }
 
-void MotorStateMachine::setPos(const Position pos) {
-    m_next_pos = pos;
-}
-
-void MotorStateMachine::process() {
+void MotorStateMachine::loop() {
     switch (m_state) {
         case INIT:
             // Wait for the servo to reach initial neutral position
@@ -39,7 +37,7 @@ void MotorStateMachine::process() {
 
         case IDLE:
             // Wait for new jobs
-            if (m_next_pos != Position::NEUTRAL) {
+            if (m_target_pos != Position::NEUTRAL) {
                 m_timer.reset();
                 m_servo.attach(m_pin);
                 m_state = ATTACHED;
@@ -52,8 +50,11 @@ void MotorStateMachine::process() {
             if (m_timer.check()) {
                 m_timer.reset();
                 m_servo.write(
-                    m_next_pos == Position::TOP ? m_top_deg : m_bottom_deg
+                    m_target_pos == Position::TOP ? m_top_deg : m_bottom_deg
                 );
+
+                m_current_pos = m_target_pos;
+                m_pos_changed = true;
                 m_state = SWITCH_ENGAGED;
             }
             break;
@@ -64,6 +65,7 @@ void MotorStateMachine::process() {
             if (m_timer.check()) {
                 m_timer.reset();
                 m_servo.write(m_neutral_deg);
+
                 m_state = SWITCH_NEUTRAL;
             }
             break;
@@ -74,6 +76,9 @@ void MotorStateMachine::process() {
             if (m_timer.check()) {
                 m_timer.reset();
                 m_servo.detach();
+
+                m_current_pos = Position::NEUTRAL;
+                m_pos_changed = true;
                 m_state = DETACHED;
             }
             break;
@@ -83,8 +88,25 @@ void MotorStateMachine::process() {
             m_timer.start(ATTACH_TIMEOUT_MS);
             if (m_timer.check()) {
                 m_timer.reset();
+                m_target_pos = Position::NEUTRAL;
                 m_state = IDLE;
             }
             break;
     }
+}
+
+bool MotorStateMachine::setPos(const Position pos) {
+    if (m_state == IDLE) {
+        m_target_pos = pos;
+        return true;
+    }
+    return false;
+}
+
+bool MotorStateMachine::hasPosChanged() {
+    if (m_pos_changed) {
+        m_pos_changed = false;
+        return true;
+    }
+    return false;
 }

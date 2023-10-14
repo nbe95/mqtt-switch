@@ -29,6 +29,7 @@ MotorStateMachine   state_machine(
     SERVO_PIN, SERVO_POS_NEUTRAL_DEG, SERVO_POS_TOP_DEG, SERVO_POS_TOP_DEG
 );
 DynamicJsonDocument json_buffer(100);
+MotorStateMachine::Position latest_cmd = MotorStateMachine::Position::NEUTRAL;
 
 
 void setup() {
@@ -37,12 +38,19 @@ void setup() {
     Serial.println(F("Starting yun-switch sketch."));
 
     mqtt_client.setCallback(onMsgReceived);
+
+    state_machine.setup();
 }
 
 void loop() {
     mqttReconnect();
     mqtt_client.loop();
-    state_machine.process();
+    state_machine.loop();
+
+    if (state_machine.hasPosChanged()) {
+        onPosChanged(state_machine.getPos());
+    }
+
 }
 
 void onMsgReceived(char* topic, byte* payload, unsigned int length) {
@@ -60,20 +68,41 @@ void onMsgReceived(char* topic, byte* payload, unsigned int length) {
         if (strcasecmp(state, "on") == 0) {
             Serial.println(F("Turning servo to position 'top'."));
             state_machine.setPos(MotorStateMachine::Position::TOP);
+            latest_cmd = MotorStateMachine::Position::TOP;
         }
         if (strcasecmp(state, "off") == 0) {
             Serial.println(F("Turning servo to position 'bottom'."));
             state_machine.setPos(MotorStateMachine::Position::BOTTOM);
+            latest_cmd = MotorStateMachine::Position::BOTTOM;
         }
-
-        json_buffer.clear();
-        json_buffer["state"] = "unknown";
-        json_buffer["version"] = SW_VERSION;
-
-        char payload[100];
-        serializeJson(json_buffer, payload);
-        mqtt_client.publish(MQTT_RESPONSE_TOPIC, payload);
     }
+}
+
+void onPosChanged(MotorStateMachine::Position pos) {
+    json_buffer.clear();
+    json_buffer["state"] = "neutral";
+    json_buffer["latest_cmd"] = "unknown";
+    switch (pos) {
+        case MotorStateMachine::Position::TOP:
+            json_buffer["state"] = "top";
+            break;
+        case MotorStateMachine::Position::BOTTOM:
+            json_buffer["state"] = "bottom";
+            break;
+    }
+    switch (latest_cmd) {
+        case MotorStateMachine::Position::TOP:
+            json_buffer["latest_cmd"] = "top";
+            break;
+        case MotorStateMachine::Position::BOTTOM:
+            json_buffer["latest_cmd"] = "bottom";
+            break;
+    }
+    json_buffer["version"] = SW_VERSION;
+
+    char payload[100];
+    serializeJson(json_buffer, payload);
+    mqtt_client.publish(MQTT_RESPONSE_TOPIC, payload);
 }
 
 void onMqttConnected() {
