@@ -50,8 +50,7 @@ void MotorStateMachine::loop() {
             if (m_timer.check()) {
                 m_timer.reset();
                 m_servo.write(
-                    m_target_pos == Position::TOP ? m_top_deg : m_bottom_deg
-                );
+                    m_target_pos == Position::TOP ? m_top_deg : m_bottom_deg);
 
                 m_current_pos = m_target_pos;
                 m_pos_changed = true;

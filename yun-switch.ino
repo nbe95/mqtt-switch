@@ -1,3 +1,5 @@
+// Copyright (c) 2023 Niklas Bettgen
+
 #include <ArduinoJson.h>
 #include <Bridge.h>
 #include <Process.h>
@@ -54,7 +56,6 @@ void loop() {
         sendMqttUpdate();
         update_timer.restart();
     }
-
 }
 
 void onMsgReceived(char* topic, byte* payload, unsigned int length) {

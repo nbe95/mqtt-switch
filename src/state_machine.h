@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Niklas Bettgen
+// Copyright (c) 2023 Niklas Bettgen
 
 #ifndef SRC_STATE_MACHINE_H_
 #define SRC_STATE_MACHINE_H_
