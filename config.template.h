@@ -4,7 +4,7 @@
 #define CONFIG_H_   // NOLINT
 
 
-#define SW_VERSION              "yun-switch@" __TIMESTAMP__
+#define SW_VERSION              __DATE__ " " __TIME__
 
 #define MQTT_BROKER             IPAddress(0, 0, 0, 0)
 #define MQTT_PORT               1883
