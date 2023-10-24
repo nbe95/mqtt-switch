@@ -69,14 +69,14 @@ void onMsgReceived(char* topic, byte* payload, unsigned int length) {
 
 void sendMqttUpdate() {
     json_buffer.clear();
-    json_buffer["act"] = "neutral";
+    json_buffer["actual"] = "neutral";
     json_buffer["latest"] = "unknown";
     switch (state_machine.getPos()) {
         case MotorStateMachine::Position::TOP:
-            json_buffer["act"] = "top";
+            json_buffer["actual"] = "top";
             break;
         case MotorStateMachine::Position::BOTTOM:
-            json_buffer["act"] = "bottom";
+            json_buffer["actual"] = "bottom";
             break;
     }
     switch (latest_cmd) {
