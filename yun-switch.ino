@@ -69,29 +69,29 @@ void onMsgReceived(char* topic, byte* payload, unsigned int length) {
 
 void sendMqttUpdate() {
     json_buffer.clear();
-    json_buffer["state"] = "neutral";
-    json_buffer["latest_cmd"] = "unknown";
+    json_buffer["act"] = "neutral";
+    json_buffer["latest"] = "unknown";
     switch (state_machine.getPos()) {
         case MotorStateMachine::Position::TOP:
-            json_buffer["state"] = "top";
+            json_buffer["act"] = "top";
             break;
         case MotorStateMachine::Position::BOTTOM:
-            json_buffer["state"] = "bottom";
+            json_buffer["act"] = "bottom";
             break;
     }
     switch (latest_cmd) {
         case MotorStateMachine::Position::TOP:
-            json_buffer["latest_cmd"] = "top";
+            json_buffer["latest"] = "top";
             break;
         case MotorStateMachine::Position::BOTTOM:
-            json_buffer["latest_cmd"] = "bottom";
+            json_buffer["latest"] = "bottom";
             break;
     }
     json_buffer["version"] = SW_VERSION;
 
     char payload[100];
     serializeJson(json_buffer, payload);
-    mqtt_client.publish(MQTT_STATUS_TOPIC, payload);
+    mqtt_client.publish(MQTT_STATE_TOPIC, payload);
 }
 
 void onMqttConnected() {

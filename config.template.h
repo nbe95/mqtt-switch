@@ -13,7 +13,7 @@
 #define MQTT_PASSWORD           ""
 
 #define MQTT_BASE_TOPIC         "yun-switch"
-#define MQTT_STATUS_TOPIC       MQTT_BASE_TOPIC "/status"
+#define MQTT_STATE_TOPIC        MQTT_BASE_TOPIC "/state"
 #define MQTT_COMMAND_TOPIC      MQTT_BASE_TOPIC "/command"
 #define MQTT_UPDATE_TIME_MS     1000ul * 60 * 15
 
