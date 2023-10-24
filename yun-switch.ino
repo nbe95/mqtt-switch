@@ -52,17 +52,17 @@ void onMsgReceived(char* topic, byte* payload, unsigned int length) {
         deserializeJson(json_buffer, payload, length);
         const char* state = json_buffer["state"];
 
-        Serial.println(state);
-
         if (strcasecmp(state, "top") == 0) {
-            Serial.println(F("Turning servo to position 'top'."));
-            state_machine.setPos(MotorStateMachine::Position::TOP);
-            latest_cmd = MotorStateMachine::Position::TOP;
+            if (state_machine.setPos(MotorStateMachine::Position::TOP)) {
+                latest_cmd = MotorStateMachine::Position::TOP;
+                Serial.println(F("Turning servo to position 'top'."));
+            }
         }
         if (strcasecmp(state, "bottom") == 0) {
-            Serial.println(F("Turning servo to position 'bottom'."));
-            state_machine.setPos(MotorStateMachine::Position::BOTTOM);
-            latest_cmd = MotorStateMachine::Position::BOTTOM;
+            if (state_machine.setPos(MotorStateMachine::Position::BOTTOM)) {
+                latest_cmd = MotorStateMachine::Position::BOTTOM;
+                Serial.println(F("Turning servo to position 'bottom'."));
+            }
         }
     }
 }
