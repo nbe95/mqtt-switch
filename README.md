@@ -9,13 +9,13 @@ motor attached?
 mqtt:
   - switch:
       name: Arduino Yun MQTT switch
-      state_topic: yun-switch/state
+      state_topic: yun-switch/location/state
       state_on: top
       state_off: bottom
       value_template: "{{ value_json.latest }}"
-      command_topic: yun-switch/command
+      command_topic: yun-switch/location/command
       payload_on: '{"state":"top"}'
       payload_off: '{"state":"bottom"}'
-      json_attributes_topic: yun-switch/state
+      json_attributes_topic: yun-switch/location/state
       optimistic: false
 ```

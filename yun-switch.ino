@@ -15,7 +15,7 @@
 YunClient               yun_client;
 PubSubClient            mqtt_client(MQTT_BROKER, MQTT_PORT, yun_client);
 MotorStateMachine       state_machine(SERVO_PIN, SERVO_POS_NEUTRAL_DEG, SERVO_POS_TOP_DEG, SERVO_POS_BOTTOM_DEG);
-DynamicJsonDocument     json_buffer(100);
+DynamicJsonDocument     json_buffer(MQTT_JSON_BUFFER);
 Timer                   update_timer(MQTT_UPDATE_TIME_MS);
 MotorStateMachine::Position latest_cmd = MotorStateMachine::Position::NEUTRAL;
 
@@ -89,7 +89,7 @@ void sendMqttUpdate() {
     }
     json_buffer["version"] = SW_VERSION;
 
-    char payload[100];
+    char payload[MQTT_JSON_BUFFER];
     serializeJson(json_buffer, payload);
     mqtt_client.publish(MQTT_STATE_TOPIC, payload);
 }
