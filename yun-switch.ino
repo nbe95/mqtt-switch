@@ -7,32 +7,16 @@
 #include <Servo.h>
 #include <YunClient.h>
 
+#include "./config.h"
 #include "./src/state_machine.h"
 #include "./src/timer.h"
 
 
-#define SW_VERSION              "yun-switch@" __TIMESTAMP__
-
-#define MQTT_BROKER             IPAddress(192, 168, 1, 20)
-#define MQTT_PORT               1883
-#define MQTT_BASE_TOPIC         "yun-switch"
-#define MQTT_STATUS_TOPIC       MQTT_BASE_TOPIC "/status"
-#define MQTT_COMMAND_TOPIC      MQTT_BASE_TOPIC "/command"
-#define MQTT_UPDATE_TIME_MS     1000ul * 60 * 15
-
-#define SERVO_PIN               6
-#define SERVO_POS_TOP_DEG       135
-#define SERVO_POS_NEUTRAL_DEG   90
-#define SERVO_POS_BOTTOM_DEG    45
-
-
-YunClient           yun_client;
-PubSubClient        mqtt_client(MQTT_BROKER, MQTT_PORT, yun_client);
-MotorStateMachine   state_machine(
-    SERVO_PIN, SERVO_POS_NEUTRAL_DEG, SERVO_POS_TOP_DEG, SERVO_POS_BOTTOM_DEG
-);
-DynamicJsonDocument json_buffer(100);
-Timer               update_timer(MQTT_UPDATE_TIME_MS);
+YunClient               yun_client;
+PubSubClient            mqtt_client(MQTT_BROKER, MQTT_PORT, yun_client);
+MotorStateMachine       state_machine(SERVO_PIN, SERVO_POS_NEUTRAL_DEG, SERVO_POS_TOP_DEG, SERVO_POS_BOTTOM_DEG);
+DynamicJsonDocument     json_buffer(100);
+Timer                   update_timer(MQTT_UPDATE_TIME_MS);
 MotorStateMachine::Position latest_cmd = MotorStateMachine::Position::NEUTRAL;
 
 
@@ -122,7 +106,7 @@ void onMqttConnected() {
 void mqttReconnect() {
     while (!mqtt_client.connected()) {
         Serial.print(F("Attempting MQTT connection... "));
-        if (mqtt_client.connect("yun-switch")) {
+        if (mqtt_client.connect(MQTT_CLIENT_ID, MQTT_USER, MQTT_PASSWORD)) {
             Serial.println(F("connected!"));
             onMqttConnected();
         } else {
