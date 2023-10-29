@@ -21,7 +21,7 @@
 #define MQTT_JSON_BUFFER        100
 
 #define SERVO_PIN               6
-#define SERVO_POS_TOP_DEG       132
+#define SERVO_POS_TOP_DEG       133
 #define SERVO_POS_NEUTRAL_DEG   90
 #define SERVO_POS_BOTTOM_DEG    48
 
