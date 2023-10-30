@@ -45,13 +45,16 @@ void onMsgReceived(char* topic, byte* payload, unsigned int length) {
     Serial.println(topic);
 
     if (strcasecmp(topic, MQTT_COMMAND_TOPIC) == 0) {
-        if (strcasecmp((char*)payload, "top") == 0) {
+        deserializeJson(json_buffer, payload, length);
+        const char* state = json_buffer["switch"];
+
+        if (strcasecmp(state, "top") == 0) {
             if (state_machine.setPos(MotorStateMachine::Position::TOP)) {
                 latest_cmd = MotorStateMachine::Position::TOP;
                 Serial.println(F("Turning servo to position 'top'."));
             }
         }
-        if (strcasecmp((char*)payload, "bottom") == 0) {
+        if (strcasecmp(state, "bottom") == 0) {
             if (state_machine.setPos(MotorStateMachine::Position::BOTTOM)) {
                 latest_cmd = MotorStateMachine::Position::BOTTOM;
                 Serial.println(F("Turning servo to position 'bottom'."));
@@ -80,7 +83,6 @@ void onStateChanged() {
             json_buffer["latest"] = "bottom";
             break;
     }
-    json_buffer["version"] = SW_VERSION;
 
     char payload[MQTT_JSON_BUFFER];
     serializeJson(json_buffer, payload);
@@ -92,13 +94,22 @@ void onMqttConnected() {
     Serial.println(MQTT_COMMAND_TOPIC);
     mqtt_client.subscribe(MQTT_COMMAND_TOPIC);
 
-    const char available[] = "online";
-    mqtt_client.publish(MQTT_AVAIL_TOPIC, available, true);
-    onStateChanged();
+    // Update device availability
+    json_buffer.clear();
+    json_buffer["state"] = "online";
+    json_buffer["version"] = SW_VERSION;
+
+    char payload[MQTT_JSON_BUFFER];
+    serializeJson(json_buffer, payload);
+    mqtt_client.publish(MQTT_AVAIL_TOPIC, payload, true);
 }
 
 void mqttReconnect() {
-    const char last_will[] = "offline";
+    json_buffer.clear();
+    json_buffer["state"] = "offline";
+    char payload_avail[MQTT_JSON_BUFFER];
+    serializeJson(json_buffer, payload_avail);
+
     while (!mqtt_client.connected()) {
         Serial.print(F("Attempting MQTT connection... "));
         if (mqtt_client.connect(
@@ -108,7 +119,7 @@ void mqttReconnect() {
             MQTT_AVAIL_TOPIC,
             0,
             true,
-            last_will)
+            payload_avail)
         ) {
             Serial.println(F("connected!"));
             onMqttConnected();
