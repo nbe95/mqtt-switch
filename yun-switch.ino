@@ -13,8 +13,10 @@
 
 YunClient               yun_client;
 PubSubClient            mqtt_client(MQTT_BROKER, MQTT_PORT, yun_client);
-MotorStateMachine       state_machine(SERVO_PIN, SERVO_POS_NEUTRAL_DEG, SERVO_POS_TOP_DEG, SERVO_POS_BOTTOM_DEG);
 DynamicJsonDocument     json_buffer(MQTT_JSON_BUFFER);
+Timer                   mqtt_reconnect_timer(MQTT_RECONNECT_TIMEOUT);
+
+MotorStateMachine       state_machine(SERVO_PIN, SERVO_POS_NEUTRAL_DEG, SERVO_POS_TOP_DEG, SERVO_POS_BOTTOM_DEG);
 MotorStateMachine::Position latest_cmd = MotorStateMachine::Position::NEUTRAL;
 
 
@@ -23,16 +25,27 @@ void setup() {
     Serial.begin(115200);
     Serial.println(F("Starting yun-switch sketch."));
 
-    mqtt_client.setCallback(onMsgReceived);
-
     state_machine.setup();
+
+    mqtt_client.setCallback(onMsgReceived);
+    mqttConnect();
 }
 
 void loop() {
-    mqttReconnect();
-    mqtt_client.loop();
-    state_machine.loop();
+    // Handle MQTT connection
+    if (mqtt_client.connected()) {
+        mqtt_client.loop();
+    } else {
+        mqtt_reconnect_timer.start();
+        if (mqtt_reconnect_timer.checkAndRestart()) {
+            if (mqttConnect()) {
+                mqtt_reconnect_timer.reset();
+            }
+        }
+    }
 
+    // Handle servo state machine
+    state_machine.loop();
     if (state_machine.hasPosChanged()) {
         onStateChanged();
     }
@@ -64,6 +77,10 @@ void onMsgReceived(char* topic, byte* payload, unsigned int length) {
 }
 
 void onStateChanged() {
+    if (!mqtt_client.connected()) {
+        return;
+    }
+
     json_buffer.clear();
     json_buffer["actual"] = "neutral";
     json_buffer["latest"] = "unknown";
@@ -104,30 +121,28 @@ void onMqttConnected() {
     mqtt_client.publish(MQTT_AVAIL_TOPIC, payload, true);
 }
 
-void mqttReconnect() {
+bool mqttConnect() {
     json_buffer.clear();
     json_buffer["state"] = "offline";
     char payload_avail[MQTT_JSON_BUFFER];
     serializeJson(json_buffer, payload_avail);
 
-    while (!mqtt_client.connected()) {
-        Serial.print(F("Attempting MQTT connection... "));
-        if (mqtt_client.connect(
-            MQTT_CLIENT_ID,
-            MQTT_USER,
-            MQTT_PASSWORD,
-            MQTT_AVAIL_TOPIC,
-            0,
-            true,
-            payload_avail)
-        ) {
-            Serial.println(F("connected!"));
-            onMqttConnected();
-        } else {
-            Serial.print(F("failed! RC="));
-            Serial.print(mqtt_client.state());
-            Serial.println(F(" Trying again in 5 seconds."));
-            delay(5000);
-        }
+    Serial.print(F("Attempting MQTT connection... "));
+    if (mqtt_client.connect(
+        MQTT_CLIENT_ID,
+        MQTT_USER,
+        MQTT_PASSWORD,
+        MQTT_AVAIL_TOPIC,
+        0,
+        true,
+        payload_avail)
+    ) {
+        Serial.println(F("connected!"));
+        onMqttConnected();
+        return true;
     }
+
+    Serial.print(F("failed! RC="));
+    Serial.println(mqtt_client.state());
+    return false;
 }
