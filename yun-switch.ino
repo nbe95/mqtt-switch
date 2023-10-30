@@ -9,14 +9,12 @@
 
 #include "./config.h"
 #include "./src/state_machine.h"
-#include "./src/timer.h"
 
 
 YunClient               yun_client;
 PubSubClient            mqtt_client(MQTT_BROKER, MQTT_PORT, yun_client);
 MotorStateMachine       state_machine(SERVO_PIN, SERVO_POS_NEUTRAL_DEG, SERVO_POS_TOP_DEG, SERVO_POS_BOTTOM_DEG);
 DynamicJsonDocument     json_buffer(MQTT_JSON_BUFFER);
-Timer                   update_timer(MQTT_UPDATE_TIME_MS);
 MotorStateMachine::Position latest_cmd = MotorStateMachine::Position::NEUTRAL;
 
 
@@ -35,10 +33,8 @@ void loop() {
     mqtt_client.loop();
     state_machine.loop();
 
-    update_timer.start();
-    if (state_machine.hasPosChanged() || update_timer.checkAndRestart()) {
-        sendMqttUpdate();
-        update_timer.restart();
+    if (state_machine.hasPosChanged()) {
+        onStateChanged();
     }
 }
 
@@ -49,16 +45,13 @@ void onMsgReceived(char* topic, byte* payload, unsigned int length) {
     Serial.println(topic);
 
     if (strcasecmp(topic, MQTT_COMMAND_TOPIC) == 0) {
-        deserializeJson(json_buffer, payload, length);
-        const char* state = json_buffer["state"];
-
-        if (strcasecmp(state, "top") == 0) {
+        if (strcasecmp((char*)payload, "top") == 0) {
             if (state_machine.setPos(MotorStateMachine::Position::TOP)) {
                 latest_cmd = MotorStateMachine::Position::TOP;
                 Serial.println(F("Turning servo to position 'top'."));
             }
         }
-        if (strcasecmp(state, "bottom") == 0) {
+        if (strcasecmp((char*)payload, "bottom") == 0) {
             if (state_machine.setPos(MotorStateMachine::Position::BOTTOM)) {
                 latest_cmd = MotorStateMachine::Position::BOTTOM;
                 Serial.println(F("Turning servo to position 'bottom'."));
@@ -67,7 +60,7 @@ void onMsgReceived(char* topic, byte* payload, unsigned int length) {
     }
 }
 
-void sendMqttUpdate() {
+void onStateChanged() {
     json_buffer.clear();
     json_buffer["actual"] = "neutral";
     json_buffer["latest"] = "unknown";
@@ -99,8 +92,7 @@ void onMqttConnected() {
     Serial.println(MQTT_COMMAND_TOPIC);
     mqtt_client.subscribe(MQTT_COMMAND_TOPIC);
 
-    sendMqttUpdate();
-    update_timer.restart();
+    onStateChanged();
 }
 
 void mqttReconnect() {

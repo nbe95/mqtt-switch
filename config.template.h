@@ -17,7 +17,6 @@
 #define MQTT_BASE_TOPIC         PROJECT_NAME "/" LOCATION_TAG
 #define MQTT_STATE_TOPIC        MQTT_BASE_TOPIC "/state"
 #define MQTT_COMMAND_TOPIC      MQTT_BASE_TOPIC "/command"
-#define MQTT_UPDATE_TIME_MS     1000ul * 60 * 15
 #define MQTT_JSON_BUFFER        100
 
 #define SERVO_PIN               6
