@@ -92,17 +92,28 @@ void onMqttConnected() {
     Serial.println(MQTT_COMMAND_TOPIC);
     mqtt_client.subscribe(MQTT_COMMAND_TOPIC);
 
+    const char available[] = "online";
+    mqtt_client.publish(MQTT_AVAIL_TOPIC, available, true);
     onStateChanged();
 }
 
 void mqttReconnect() {
+    const char last_will[] = "offline";
     while (!mqtt_client.connected()) {
         Serial.print(F("Attempting MQTT connection... "));
-        if (mqtt_client.connect(MQTT_CLIENT_ID, MQTT_USER, MQTT_PASSWORD)) {
+        if (mqtt_client.connect(
+            MQTT_CLIENT_ID,
+            MQTT_USER,
+            MQTT_PASSWORD,
+            MQTT_AVAIL_TOPIC,
+            0,
+            true,
+            last_will)
+        ) {
             Serial.println(F("connected!"));
             onMqttConnected();
         } else {
-            Serial.print(F("failed! rc="));
+            Serial.print(F("failed! RC="));
             Serial.print(mqtt_client.state());
             Serial.println(F(" Trying again in 5 seconds."));
             delay(5000);
