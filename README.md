@@ -5,10 +5,13 @@ motor attached?
 
 ## MQTT messages
 
-Note: All topics are preceeded by the base topic and the location tag, e.g.
+All topics are preceeded by the base topic and the location tag, e.g.
 `yun-switch/lightswitch-bedroom`.
 
-By default, any payload is a JSON formatted string and retained.
+By default, any message consists of a JSON formatted string and will be
+retained.
+
+> Note the internal payload buffer limitation of 100 characters.
 
 | Direction | Topic       | Description                     | Options/example                                       |
 |-----------|-------------|---------------------------------|-------------------------------------------------------|
