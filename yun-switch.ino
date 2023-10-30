@@ -91,7 +91,7 @@ void sendMqttUpdate() {
 
     char payload[MQTT_JSON_BUFFER];
     serializeJson(json_buffer, payload);
-    mqtt_client.publish(MQTT_STATE_TOPIC, payload);
+    mqtt_client.publish(MQTT_STATE_TOPIC, payload, true);
 }
 
 void onMqttConnected() {
