@@ -22,9 +22,9 @@
 #define MQTT_JSON_BUFFER        100
 
 #define SERVO_PIN               6
-#define SERVO_POS_TOP_DEG       134
+#define SERVO_POS_TOP_DEG       135
 #define SERVO_POS_NEUTRAL_DEG   90
-#define SERVO_POS_BOTTOM_DEG    48
+#define SERVO_POS_BOTTOM_DEG    49
 
 
 #endif  // CONFIG_H_  // NOLINT
