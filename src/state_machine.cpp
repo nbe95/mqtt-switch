@@ -4,6 +4,9 @@
 #define SWITCH_TIMEOUT_MS   1500
 #define ATTACH_TIMEOUT_MS   200
 
+#define SERVO_MIN_DEG       0
+#define SERVO_MAX_DEG       180
+
 #include "./state_machine.h" //NOLINT
 
 #include <Servo.h>
@@ -41,6 +44,10 @@ void MotorStateMachine::loop() {
                 m_timer.reset();
                 m_servo.attach(m_pin);
                 m_state = ATTACHED;
+            } else if (m_manual_deg >= SERVO_MIN_DEG && m_manual_deg <= SERVO_MAX_DEG) {
+                m_servo.attach(m_pin);
+                m_servo.write(m_manual_deg);
+                m_state = MANUAL;
             }
             break;
 
@@ -91,12 +98,26 @@ void MotorStateMachine::loop() {
                 m_state = IDLE;
             }
             break;
+
+        case MANUAL:    // Manual mode for position calibration/testing
+            if (m_manual_deg < SERVO_MIN_DEG || m_manual_deg > SERVO_MAX_DEG) {
+                m_state = IDLE;
+            }
     }
 }
 
 bool MotorStateMachine::setPos(const Position pos) {
+    m_manual_deg = -1;
     if (m_state == IDLE) {
         m_target_pos = pos;
+        return true;
+    }
+    return false;
+}
+
+bool MotorStateMachine::setManualPos(const int degrees) {
+    if (m_state == IDLE) {
+        m_manual_deg = degrees;
         return true;
     }
     return false;

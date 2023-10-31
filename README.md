@@ -5,7 +5,7 @@ motor attached?
 
 ## MQTT messages
 
-All topics are preceeded by the base topic and the location tag, e.g.
+All topics are preceded by the base topic and the location tag, e.g.
 `yun-switch/lightswitch-bedroom`.
 
 By default, any message consists of a JSON formatted string and will be
@@ -15,7 +15,7 @@ retained.
 
 | Direction | Topic       | Description                     | Options/example                                       |
 |-----------|-------------|---------------------------------|-------------------------------------------------------|
-| In        | `/command`  | Request to operate the switch.  | `{"switch":"top"}`                                    |
+| In        | `/command`  | Request to operate the switch.  | `{"switch":"top"}` or `{'pos':142}` for testing       |
 | Out       | `/state`    | Current state of the switch.    | `{"actual":"neutral","latest":"top"}`                 |
 | Out       | `/avail`    | Availability indication (LWT).  | `{"state":"online","version":"Oct 30 2023 10:54:00"}` |
 

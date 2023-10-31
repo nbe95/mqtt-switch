@@ -66,12 +66,16 @@ void onMsgReceived(char* topic, byte* payload, unsigned int length) {
                 latest_cmd = MotorStateMachine::Position::TOP;
                 Serial.println(F("Turning servo to position 'top'."));
             }
-        }
-        if (strcasecmp(state, "bottom") == 0) {
+        } else if (strcasecmp(state, "bottom") == 0) {
             if (state_machine.setPos(MotorStateMachine::Position::BOTTOM)) {
                 latest_cmd = MotorStateMachine::Position::BOTTOM;
                 Serial.println(F("Turning servo to position 'bottom'."));
             }
+        } else if (json_buffer.containsKey("pos")) {
+            int pos = atoi(json_buffer["pos"]);
+            state_machine.setManualPos(pos);
+            Serial.print(F("Turning servo to manual position: "));
+            Serial.println(pos);
         }
     }
 }
