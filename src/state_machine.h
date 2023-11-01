@@ -19,7 +19,7 @@ class MotorStateMachine {
     Position    getPos() const { return m_current_pos; }
     bool        hasPosChanged();
 
-    bool        setManualPos(const int);
+    void        setManualPos(const int);
 
  protected:
     enum State {

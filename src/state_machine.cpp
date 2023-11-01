@@ -46,7 +46,6 @@ void MotorStateMachine::loop() {
                 m_state = ATTACHED;
             } else if (m_manual_deg >= SERVO_MIN_DEG && m_manual_deg <= SERVO_MAX_DEG) {
                 m_servo.attach(m_pin);
-                m_servo.write(m_manual_deg);
                 m_state = MANUAL;
             }
             break;
@@ -101,8 +100,12 @@ void MotorStateMachine::loop() {
 
         case MANUAL:    // Manual mode for position calibration/testing
             if (m_manual_deg < SERVO_MIN_DEG || m_manual_deg > SERVO_MAX_DEG) {
+                m_servo.write(m_neutral_deg);
                 m_state = IDLE;
+            } else {
+                m_servo.write(m_manual_deg);
             }
+            break;
     }
 }
 
@@ -115,12 +118,8 @@ bool MotorStateMachine::setPos(const Position pos) {
     return false;
 }
 
-bool MotorStateMachine::setManualPos(const int degrees) {
-    if (m_state == IDLE) {
-        m_manual_deg = degrees;
-        return true;
-    }
-    return false;
+void MotorStateMachine::setManualPos(const int degrees) {
+    m_manual_deg = degrees;
 }
 
 bool MotorStateMachine::hasPosChanged() {

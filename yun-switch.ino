@@ -72,7 +72,7 @@ void onMsgReceived(char* topic, byte* payload, unsigned int length) {
                 Serial.println(F("Turning servo to position 'bottom'."));
             }
         } else if (json_buffer.containsKey("pos")) {
-            int pos = atoi(json_buffer["pos"]);
+            const int pos = json_buffer["pos"];
             state_machine.setManualPos(pos);
             Serial.print(F("Turning servo to manual position: "));
             Serial.println(pos);
