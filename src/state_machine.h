@@ -19,6 +19,8 @@ class MotorStateMachine {
     Position    getPos() const { return m_current_pos; }
     bool        hasPosChanged();
 
+    void        setManualPos(const int);
+
  protected:
     enum State {
         INIT,
@@ -26,11 +28,13 @@ class MotorStateMachine {
         ATTACHED,
         SWITCH_ENGAGED,
         SWITCH_NEUTRAL,
-        DETACHED
+        DETACHED,
+        MANUAL
     }           m_state = State::INIT;
     Position    m_current_pos = Position::NEUTRAL;
     Position    m_target_pos = Position::NEUTRAL;
     bool        m_pos_changed = false;
+    int         m_manual_deg = -1;
 
     Servo       m_servo;
     const int   m_pin;
