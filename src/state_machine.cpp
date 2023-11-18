@@ -111,7 +111,7 @@ void MotorStateMachine::loop() {
 
 bool MotorStateMachine::setPos(const Position pos) {
     m_manual_deg = -1;
-    if (m_state == IDLE) {
+    if (m_state == IDLE || m_state == MANUAL) {
         m_target_pos = pos;
         return true;
     }
