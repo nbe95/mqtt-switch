@@ -24,7 +24,7 @@
 #define SERVO_PIN               6
 #define SERVO_POS_TOP_DEG       135
 #define SERVO_POS_NEUTRAL_DEG   90
-#define SERVO_POS_BOTTOM_DEG    49
+#define SERVO_POS_BOTTOM_DEG    55
 
 
 #endif  // CONFIG_H_  // NOLINT
