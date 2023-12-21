@@ -13,9 +13,9 @@ to fiddle around with the even older electrical installation of my apartment.
 All you need to do is to fit the Arduino and the servo motor into a nice looking
 box and upload/fine-tune this code.
 
-*Et voilà!* Enjoy turning your device on/off using MQTT commands and even
-integrate it in systems like **Home Assistant** with a minimum effort.
-:tada:
+*Et voilà!* Enjoy turning your device on/off using MQTT commands and
+even integrate it in systems like **Home Assistant** with a minimum
+effort. :tada:
 
 > :bulb: See the device [in action](./doc/action.mov)! More images are available
 in the [doc](./doc) directory.
