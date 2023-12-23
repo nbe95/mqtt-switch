@@ -4,7 +4,7 @@
 #define CONFIG_H_   // NOLINT
 
 
-#define PROJECT_NAME            "yun-switch"
+#define PROJECT_NAME            "mqtt-switch"
 #define LOCATION_TAG            ""
 #define SW_VERSION              __DATE__ " " __TIME__
 
