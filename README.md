@@ -63,6 +63,19 @@ mqtt:
 
 ## Development
 
+### A note on versioning
+
+This sketch utilizes (of course!) [Semantic Versioning](https://semver.org/). A
+macro constant `GIT_VERSION` is expected to be defined and will be printed out
+at program start-up. As there is no generalized solution - *and that's a
+shame!* - to fetch VCS version information at build time, providing this
+information depends on your own individual workflow. Check out
+[git-describe-arduino](https://github.com/fabianoriccardi/git-describe-arduino)
+for a sophisticated workaround.
+
+However, the sketch will also run without any version information and
+automatically fall back to the compile date and time in that case.
+
 ### Linting
 
 ```sh

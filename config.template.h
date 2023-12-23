@@ -6,7 +6,6 @@
 
 #define PROJECT_NAME            "mqtt-switch"
 #define LOCATION_TAG            ""
-#define SW_VERSION              __DATE__ " " __TIME__
 
 #define MQTT_BROKER             IPAddress(192, 168, 1, 20)
 #define MQTT_PORT               1883

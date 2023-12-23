@@ -8,8 +8,13 @@
 #include <YunClient.h>
 
 #include "./config.h"
-#include "./version.h"
 #include "./src/state_machine.h"
+
+
+// Git version fallback
+#ifndef GIT_VERSION
+#define GIT_VERSION __DATE__ " " __TIME__
+#endif
 
 
 YunClient               yun_client;
@@ -24,7 +29,7 @@ MotorStateMachine::Position latest_cmd = MotorStateMachine::Position::NEUTRAL;
 void setup() {
     Bridge.begin();
     Serial.begin(115200);
-    Serial.println(F("Starting " PROJECT_NAME " v" VERSION "."));
+    Serial.println(F("Starting " PROJECT_NAME " (version: " GIT_VERSION ")."));
 
     state_machine.setup();
 
@@ -119,7 +124,7 @@ void onMqttConnected() {
     // Update device availability
     json_buffer.clear();
     json_buffer["state"] = "online";
-    json_buffer["version"] = SW_VERSION;
+    json_buffer["version"] = GIT_VERSION;
 
     char payload[MQTT_JSON_BUFFER];
     serializeJson(json_buffer, payload);
