@@ -1,4 +1,4 @@
-# Arduino Yún  MQTT switch
+# MQTT hardware switch
 
 ## Introduction
 
@@ -27,7 +27,7 @@ in the [doc](./doc) directory.
 ### MQTT messages
 
 All topics are preceded by the base topic and a location tag, e.g.
-`yun-switch/light-switch-bedroom`.
+`mqtt-switch/light-switch-bedroom`.
 
 All message consist of a JSON formatted string and will be retained by default.
 
@@ -44,19 +44,19 @@ All message consist of a JSON formatted string and will be retained by default.
 ```yml
 mqtt:
   - switch:
-      name: Arduino Yun MQTT switch
+      name: MQTT hardware switch
       availability:
         payload_available: online
         payload_not_available: offline
-        topic: yun-switch/{location}/avail
+        topic: mqtt-switch/{location}/avail
         value_template: "{{ value_json.state }}"
-      state_topic: yun-switch/{location}/state
+      state_topic: mqtt-switch/{location}/state
       state_on: top
       state_off: bottom
       value_template: "{{ value_json.latest }}"
-      command_topic: yun-switch/{location}/command
+      command_topic: mqtt-switch/{location}/command
       payload_on: '{"switch":"top"}'
       payload_off: '{"switch":"bottom"}'
-      json_attributes_topic: yun-switch/{location}/state
+      json_attributes_topic: mqtt-switch/{location}/state
       optimistic: false
 ```

@@ -23,7 +23,7 @@ MotorStateMachine::Position latest_cmd = MotorStateMachine::Position::NEUTRAL;
 void setup() {
     Bridge.begin();
     Serial.begin(115200);
-    Serial.println(F("Starting yun-switch sketch."));
+    Serial.println(F("Starting " PROJECT_NAME " sketch."));
 
     state_machine.setup();
 
