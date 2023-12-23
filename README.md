@@ -60,3 +60,15 @@ mqtt:
       json_attributes_topic: mqtt-switch/{location}/state
       optimistic: false
 ```
+
+## Development
+
+### Linting
+
+```sh
+python -m venv venv
+source ./venv/bin/activate
+pip install --upgrade cpplint
+
+cpplint --recursive --extensions=ino,c,cpp,h,hpp .
+`````
