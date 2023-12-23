@@ -8,6 +8,7 @@
 #include <YunClient.h>
 
 #include "./config.h"
+#include "./version.h"
 #include "./src/state_machine.h"
 
 
@@ -23,7 +24,7 @@ MotorStateMachine::Position latest_cmd = MotorStateMachine::Position::NEUTRAL;
 void setup() {
     Bridge.begin();
     Serial.begin(115200);
-    Serial.println(F("Starting " PROJECT_NAME " sketch."));
+    Serial.println(F("Starting " PROJECT_NAME " v" VERSION "."));
 
     state_machine.setup();
 

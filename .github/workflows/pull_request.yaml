@@ -3,6 +3,8 @@ name: Lint
 on:
   pull_request:
     types:
+      - labeled
+      - unlabeled
       - opened
       - reopened
       - synchronize
@@ -20,3 +22,21 @@ jobs:
         run: pip install --upgrade cpplint
       - name: Run cpplint
         run: cpplint --recursive --extensions=ino,c,cpp,h,hpp ./
+
+  validate-release:
+    name: Validate release label and notes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jefflinse/pr-semver-bump@v1.6.0
+        name: Bump and tag new version
+        with:
+          mode: validate
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          major-label: major
+          minor-label: minor
+          patch-label: patch
+          noop-labels: ""
+          require-release-notes: false
+          base-branch: true
+          with-v: false

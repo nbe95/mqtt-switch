@@ -1,0 +1,50 @@
+name: Create release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  bump-tag-version:
+    name: Bump and tag new version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: read
+      pull-requests: read
+    outputs:
+      version: ${{ steps.semver.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jefflinse/pr-semver-bump@v1.6.0
+        name: Bump and tag new version
+        id: semver
+        with:
+          mode: bump
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          major-label: major
+          minor-label: minor
+          patch-label: patch
+          noop-labels: ""
+          require-release-notes: false
+          base-branch: true
+          with-v: false
+
+  commit-version:
+    name: Commit new version to repository
+    runs-on: ubuntu-latest
+    needs: [bump-tag-version]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Determine fixed version
+        run: |
+          sed -i "/^#define VERSION/s/\".*\"/\"${{ needs.bump-tag-version.outputs.version }}\"/" ./version.h
+      - name: Commit and push
+        run: |
+          git config user.name '$GITHUB_ACTOR'
+          git config user.email '$GITHUB_ACTOR_ID@users.noreply.github.com'
+          git commit -am "Automatic version bump"
+          git push
