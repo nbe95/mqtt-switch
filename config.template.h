@@ -1,7 +1,7 @@
 // Copyright (c) 2023 Niklas Bettgen
 
-#ifndef CONFIG_H_   // NOLINT
-#define CONFIG_H_   // NOLINT
+#ifndef CONFIG_H_
+#define CONFIG_H_
 
 
 #define PROJECT_NAME            "mqtt-switch"
@@ -27,4 +27,4 @@
 #define SERVO_POS_BOTTOM_DEG    46
 
 
-#endif  // CONFIG_H_  // NOLINT
+#endif  // CONFIG_H_
