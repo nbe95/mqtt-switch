@@ -11,7 +11,9 @@ installation?
 I used this setup to automate my old, not so smart bathroom fan without having
 to fiddle around with the even older electrical installation of my apartment.
 All you need to do is to fit the Arduino and the servo motor into a nice looking
-box and upload/fine-tune this code.
+box and upload this code. Before, make sure to copy the
+[config template](./config.template.h) to `config.h` and fine-tune all values to
+fit your needs.
 
 *Et voilà!* Enjoy turning your device on/off using MQTT commands and
 even integrate it in systems like **Home Assistant** with a minimum
