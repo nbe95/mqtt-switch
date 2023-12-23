@@ -70,5 +70,5 @@ python -m venv venv
 source ./venv/bin/activate
 pip install --upgrade cpplint
 
-cpplint --recursive --extensions=ino,c,cpp,h,hpp .
+cpplint --recursive --extensions=ino,c,cpp,h,hpp ./
 `````

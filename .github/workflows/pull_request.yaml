@@ -1,0 +1,22 @@
+name: Lint
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+jobs:
+  lint:
+    name: Lint the c++ code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+      - name: Install cpplint
+        run: pip install --upgrade cpplint
+      - name: Run cpplint
+        run: cpplint --recursive --extensions=ino,c,cpp,h,hpp ./
