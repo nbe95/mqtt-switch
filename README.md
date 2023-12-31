@@ -1,4 +1,4 @@
-# MQTT hardware switch
+# MQTT Hardware Switch
 
 ## Introduction
 
