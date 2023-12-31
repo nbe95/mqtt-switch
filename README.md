@@ -19,10 +19,10 @@ fit your needs.
 even integrate it in systems like **Home Assistant** with a minimum
 effort. :tada:
 
-> :bulb: See the device [in action](./doc/action.mov)! More images are available
-in the [doc](./doc) directory.
+![A fancy teaser](./doc/action.gif)
 
-![Overview picture](./doc/overview.jpg)
+> :clapper: Take a look at the [doc](./doc) directory for more images and videos
+of the device in action.
 
 ## Documentation
 
