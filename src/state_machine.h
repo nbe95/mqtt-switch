@@ -4,7 +4,7 @@
 #define SRC_STATE_MACHINE_H_
 
 #include <Servo.h>
-#include "./lib/timer/src/timer.h"
+#include "./lib/timer/timer.h"
 
 class MotorStateMachine {
  public:
