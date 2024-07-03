@@ -41,26 +41,33 @@ All message consist of a JSON formatted string and will be retained by default.
 | Out       | `/state`    | Current state of the switch.    | `{"actual":"neutral","latest":"top"}`                 |
 | Out       | `/avail`    | Availability indication (LWT).  | `{"state":"online","version":"Oct 30 2023 10:54:00"}` |
 
-### Home Assistant sample configuration
+### Example configuration for Home Assistant
 
-```yml
+```yaml
 mqtt:
   - switch:
-      name: MQTT hardware switch
+      name: My fancy MQTT switch
+      unique_id: 5054b2fb-bdc3-4d89-95c7-069dea94de6b
+      device_class: switch
+      availability_mode: all
       availability:
-        payload_available: online
-        payload_not_available: offline
-        topic: mqtt-switch/{location}/avail
-        value_template: "{{ value_json.state }}"
-      state_topic: mqtt-switch/{location}/state
+        - payload_available: online
+          payload_not_available: offline
+          topic: mqtt-switch/my_location_tag/avail
+          value_template: "{{ value_json.state }}"
+        - payload_available: idle
+          payload_not_available: busy
+          topic: mqtt-switch/my_location_tag/state
+          value_template: "{% if value_json.actual == 'neutral' -%} idle {%- else -%} busy {%- endif %}"
+      state_topic: mqtt-switch/my_location_tag/state
       state_on: top
       state_off: bottom
       value_template: "{{ value_json.latest }}"
-      command_topic: mqtt-switch/{location}/command
+      command_topic: mqtt-switch/my_location_tag/command
       payload_on: '{"switch":"top"}'
       payload_off: '{"switch":"bottom"}'
-      json_attributes_topic: mqtt-switch/{location}/state
       optimistic: false
+      json_attributes_topic: mqtt-switch/my_location_tag/state
 ```
 
 ## Development
