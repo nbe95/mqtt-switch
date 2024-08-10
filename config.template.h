@@ -25,5 +25,10 @@
 #define SERVO_POS_NEUTRAL_DEG   90
 #define SERVO_POS_BOTTOM_DEG    46
 
+#define BUTTON_PIN              13
+#define BUTTON_DEBOUNCE_MS      30
+#define BUTTON_USE_PULLUP       true
+#define LED_PIN                 12
+#define LED_ON_TOP              true
 
 #endif  // CONFIG_H_

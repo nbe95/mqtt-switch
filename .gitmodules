@@ -1,3 +1,6 @@
 [submodule "src/lib/timer"]
 	path = src/lib/timer
 	url = https://github.com/nbe95/arduino-timer.git
+[submodule "src/lib/debouncer"]
+	path = src/lib/debouncer
+	url = https://github.com/nbe95/arduino-debouncer.git
