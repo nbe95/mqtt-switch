@@ -8,21 +8,21 @@ installation?
 
 **We've got you covered!**
 
-I used this setup to automate my old, not so smart bathroom fan without having
-to fiddle around with the even older electrical installation of my apartment.
-All you need to do is to fit the Arduino and the servo motor into a nice looking
-box and upload this code. Before, make sure to copy the
-[config template](./config.template.h) to `config.h` and fine-tune all values to
-fit your needs.
+I used this setup to automate my old, not so smart bathroom fan without having to fiddle around with
+the even older electrical installation of my apartment. All you need to do is to fit the Arduino
+and the servo motor into a nice looking box and upload this code. Before, make sure to copy the
+[config template](./config.template.h) to `config.h` and fine-tune all values to fit your needs.
 
-*Et voilà!* Enjoy turning your device on/off using MQTT commands and
-even integrate it in systems like **Home Assistant** with a minimum
-effort. :tada:
+*Et voilà!* Enjoy turning your device on/off using MQTT commands and even integrate it in systems
+like **Home Assistant** with a minimum effort. :tada:
+
+If you like, you can attach a hardware button and/or an LED to both control your device and
+indicate its latest status.
 
 ![A fancy teaser](./doc/action.gif)
 
-> :clapper: Take a look at the [doc](./doc) directory for more images and videos
-of the device in action.
+> :clapper: Take a look at the [doc](./doc) directory for more images and videos of the device in
+action.
 
 ## Documentation
 
@@ -74,16 +74,15 @@ mqtt:
 
 ### A note on versioning
 
-This sketch utilizes (of course!) [Semantic Versioning](https://semver.org/). A
-macro constant `GIT_VERSION` is expected to be defined and will be printed out
-at program start-up. As there is no generalized solution - *and that's a
-shame!* - to fetch VCS version information at build time, providing this
-information depends on your own individual workflow. Check out
-[git-describe-arduino](https://github.com/fabianoriccardi/git-describe-arduino)
-for a sophisticated workaround.
+This sketch utilizes (of course!) [Semantic Versioning](https://semver.org/). A macro constant
+`GIT_VERSION` is expected to be defined and will be printed out at program start-up. As there is no
+generalized solution - *and that's a shame!* - to fetch VCS version information at build time,
+providing this information depends on your own individual workflow. Check out
+[git-describe-arduino](https://github.com/fabianoriccardi/git-describe-arduino) for a sophisticated
+workaround.
 
-However, the sketch will also run without any version information and
-automatically fall back to the compile date and time in that case.
+However, the sketch will also run without any version information and automatically fall back to the
+compile date and time in that case.
 
 ### Linting
 
@@ -93,4 +92,4 @@ source ./venv/bin/activate
 pip install --upgrade cpplint
 
 cpplint --recursive --extensions=ino,c,cpp,h,hpp ./
-`````
+```
