@@ -48,10 +48,15 @@ void loop() {
     if (mqtt_client.connected()) {
         mqtt_client.loop();
     } else {
+        // Indicate connection attempt by flashing LED with 2Hz
         mqtt_reconnect_timer.start();
+        const Timer::ms freq = 500;
+        digitalWrite(LED_PIN, ((mqtt_reconnect_timer.getElapsedTime() % freq) < freq / 2) ? HIGH : LOW);
+
         if (mqtt_reconnect_timer.checkAndRestart()) {
             if (mqttConnect()) {
                 mqtt_reconnect_timer.reset();
+                setLed();
             }
         }
     }
@@ -124,7 +129,7 @@ void onStateChanged() {
     }
 
     // Update LED
-    digitalWrite(LED_PIN, (latest_cmd == MotorStateMachine::Position::BOTTOM) ^ LED_ON_TOP);
+    setLed();
 }
 
 void onMqttConnected() {
@@ -172,6 +177,8 @@ void setServoTop() {
     if (state_machine.setPos(MotorStateMachine::Position::TOP)) {
         latest_cmd = MotorStateMachine::Position::TOP;
         Serial.println(F("Turning servo to position 'top'."));
+    } else {
+        Serial.println(F("State machine is busy! Not doing anything."));
     }
 }
 
@@ -179,6 +186,8 @@ void setServoBottom() {
     if (state_machine.setPos(MotorStateMachine::Position::BOTTOM)) {
         latest_cmd = MotorStateMachine::Position::BOTTOM;
         Serial.println(F("Turning servo to position 'bottom'."));
+    } else {
+        Serial.println(F("State machine is busy! Not doing anything."));
     }
 }
 
@@ -186,4 +195,8 @@ void setServoToPos(const int pos) {
     state_machine.setManualPos(pos);
     Serial.print(F("Turning servo to manual position: "));
     Serial.println(pos);
+}
+
+void setLed() {
+    digitalWrite(LED_PIN, ((latest_cmd == MotorStateMachine::Position::BOTTOM) ^ LED_ON_TOP) ? HIGH : LOW);
 }
