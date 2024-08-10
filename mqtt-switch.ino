@@ -27,6 +27,7 @@ Timer                   mqtt_reconnect_timer(MQTT_RECONNECT_TIMEOUT);
 MotorStateMachine       state_machine(SERVO_PIN, SERVO_POS_NEUTRAL_DEG, SERVO_POS_TOP_DEG, SERVO_POS_BOTTOM_DEG);
 MotorStateMachine::Position latest_cmd = MotorStateMachine::Position::NEUTRAL;
 DebouncedSwitch         button(BUTTON_PIN, BUTTON_DEBOUNCE_MS, BUTTON_USE_PULLUP);
+bool                    latest_cmd_by_mqtt = false;
 
 
 void setup() {
@@ -71,6 +72,7 @@ void loop() {
     button.debounce();
     if (button.hasChanged() && button.isClosed()) {
         Serial.println(F("Button was pressed."));
+        latest_cmd_by_mqtt = false;
         if (latest_cmd == MotorStateMachine::Position::TOP) {
             setServoBottom();
         } else {
@@ -90,10 +92,13 @@ void onMsgReceived(char* topic, byte* payload, unsigned int length) {
         const char* state = json_buffer["switch"];
 
         if (strcasecmp(state, "top") == 0) {
+            latest_cmd_by_mqtt = true;
             setServoTop();
         } else if (strcasecmp(state, "bottom") == 0) {
+            latest_cmd_by_mqtt = true;
             setServoBottom();
         } else if (json_buffer.containsKey("pos")) {
+            latest_cmd_by_mqtt = true;
             const int pos = json_buffer["pos"];
             setServoToPos(pos);
         }
@@ -106,6 +111,7 @@ void onStateChanged() {
         json_buffer.clear();
         json_buffer["actual"] = "neutral";
         json_buffer["latest"] = "unknown";
+        json_buffer["trigger"] = "unknown";
         switch (state_machine.getPos()) {
             case MotorStateMachine::Position::TOP:
                 json_buffer["actual"] = "top";
@@ -121,6 +127,11 @@ void onStateChanged() {
             case MotorStateMachine::Position::BOTTOM:
                 json_buffer["latest"] = "bottom";
                 break;
+        }
+        if (latest_cmd_by_mqtt) {
+            json_buffer["trigger"] = "mqtt";
+        } else {
+            json_buffer["trigger"] = "button";
         }
 
         char payload[MQTT_JSON_BUFFER];

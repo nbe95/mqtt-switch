@@ -35,11 +35,11 @@ All message consist of a JSON formatted string and will be retained by default.
 
 > Note the internal payload buffer limitation of 100 characters.
 
-| Direction | Topic       | Description                     | Options/example                                       |
-|-----------|-------------|---------------------------------|-------------------------------------------------------|
-| In        | `/command`  | Request to operate the switch.  | `{"switch":"top"}` or `{"pos":42}` for testing        |
-| Out       | `/state`    | Current state of the switch.    | `{"actual":"neutral","latest":"top"}`                 |
-| Out       | `/avail`    | Availability indication (LWT).  | `{"state":"online","version":"Oct 30 2023 10:54:00"}` |
+| Direction | Topic       | Description                     | Options/example                                           |
+|-----------|-------------|---------------------------------|-----------------------------------------------------------|
+| In        | `/command`  | Request to operate the switch.  | `{"switch":"top"}` or `{"pos":42}` for testing            |
+| Out       | `/state`    | Current state of the switch.    | `{"actual":"neutral","latest":"top","trigger":"mqtt"}`    |
+| Out       | `/avail`    | Availability indication (LWT).  | `{"state":"online","version":"Oct 30 2023 10:54:00"}`     |
 
 ### Example configuration for Home Assistant
 
