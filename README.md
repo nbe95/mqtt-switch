@@ -16,12 +16,12 @@ and the servo motor into a nice looking box and upload this code. Before, make s
 *Et voilà!* Enjoy turning your device on/off using MQTT commands and even integrate it in systems
 like **Home Assistant** with a minimum effort. :tada:
 
-If you like, you can attach a hardware button and/or an LED to both control your device and
-indicate its latest status.
+> Optional: If you like, you can attach an additional hardware button and/or an LED to both control
+your device and also indicate its latest status.
 
 ![A fancy teaser](./doc/action.gif)
 
-> :clapper: Take a look at the [doc](./doc) directory for more images and videos of the device in
+:clapper: Take a look at the [doc](./doc) directory for more images and videos of the device in
 action.
 
 ## Documentation
