@@ -63,12 +63,13 @@ void loop() {
     }
 
     // Handle actions triggered by button press
+    button.debounce();
     if (button.hasChanged() && button.isClosed()) {
-        Serial.print(F("Button was pressed."));
-        if (latest_cmd == MotorStateMachine::Position::BOTTOM) {
-            setServoTop();
-        } else {
+        Serial.println(F("Button was pressed."));
+        if (latest_cmd == MotorStateMachine::Position::TOP) {
             setServoBottom();
+        } else {
+            setServoTop();
         }
     }
 }
