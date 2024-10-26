@@ -12,7 +12,7 @@
 #include <Servo.h>
 
 
-MotorStateMachine::MotorStateMachine(
+ServoStateMachine::ServoStateMachine(
     const int pin,
     const int neutral_deg,
     const int top_deg,
@@ -22,12 +22,12 @@ m_neutral_deg(neutral_deg),
 m_top_deg(top_deg),
 m_bottom_deg(bottom_deg) {}
 
-void MotorStateMachine::setup() {
+void ServoStateMachine::setup() {
     m_servo.attach(m_pin);
     m_servo.write(m_neutral_deg);
 }
 
-void MotorStateMachine::loop() {
+void ServoStateMachine::loop() {
     switch (m_state) {
         case INIT:
             // Wait for the servo to reach initial neutral position
@@ -59,7 +59,9 @@ void MotorStateMachine::loop() {
                     m_target_pos == Position::TOP ? m_top_deg : m_bottom_deg);
 
                 m_current_pos = m_target_pos;
+                m_latest_pos = m_target_pos;
                 m_pos_changed = true;
+
                 m_state = SWITCH_ENGAGED;
             }
             break;
@@ -84,6 +86,7 @@ void MotorStateMachine::loop() {
 
                 m_current_pos = Position::NEUTRAL;
                 m_pos_changed = true;
+
                 m_state = DETACHED;
             }
             break;
@@ -94,6 +97,7 @@ void MotorStateMachine::loop() {
             if (m_timer.check()) {
                 m_timer.reset();
                 m_target_pos = Position::NEUTRAL;
+
                 m_state = IDLE;
             }
             break;
@@ -109,7 +113,7 @@ void MotorStateMachine::loop() {
     }
 }
 
-bool MotorStateMachine::setPos(const Position pos) {
+bool ServoStateMachine::setPos(const Position pos) {
     m_manual_deg = -1;
     if (m_state == IDLE || m_state == MANUAL) {
         m_target_pos = pos;
@@ -118,11 +122,11 @@ bool MotorStateMachine::setPos(const Position pos) {
     return false;
 }
 
-void MotorStateMachine::setManualPos(const int degrees) {
+void ServoStateMachine::setManualPos(const int degrees) {
     m_manual_deg = degrees;
 }
 
-bool MotorStateMachine::hasPosChanged() {
+bool ServoStateMachine::hasPosChanged() {
     if (m_pos_changed) {
         m_pos_changed = false;
         return true;
