@@ -18,7 +18,7 @@
 #define MQTT_COMMAND_TOPIC      MQTT_BASE_TOPIC "/command"
 #define MQTT_AVAIL_TOPIC        MQTT_BASE_TOPIC "/avail"
 #define MQTT_RECONNECT_TIMEOUT  1000ul * 5
-#define MQTT_JSON_BUFFER        100
+#define MQTT_JSON_BUFFER        150
 
 #define SERVO_PIN               6
 #define SERVO_POS_TOP_DEG       138
