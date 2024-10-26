@@ -55,10 +55,6 @@ mqtt:
           payload_not_available: offline
           topic: mqtt-switch/my_location_tag/avail
           value_template: "{{ value_json.state }}"
-        - payload_available: idle
-          payload_not_available: busy
-          topic: mqtt-switch/my_location_tag/state
-          value_template: "{% if value_json.actual == 'neutral' -%} idle {%- else -%} busy {%- endif %}"
       state_topic: mqtt-switch/my_location_tag/state
       state_on: top
       state_off: bottom

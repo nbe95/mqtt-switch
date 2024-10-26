@@ -6,17 +6,18 @@
 #include <Servo.h>
 #include "./lib/timer/timer.h"
 
-class MotorStateMachine {
+class ServoStateMachine {
  public:
     enum Position { NEUTRAL, TOP, BOTTOM };
 
-    MotorStateMachine(const int, const int, const int, const int);
+    ServoStateMachine(const int, const int, const int, const int);
 
     void        setup();
     void        loop();
 
     bool        setPos(const Position);
-    Position    getPos() const { return m_current_pos; }
+    Position    getCurrentPos() const { return m_current_pos; }
+    Position    getLatestPos() const { return m_latest_pos; }
     bool        hasPosChanged();
 
     void        setManualPos(const int);
@@ -32,6 +33,7 @@ class MotorStateMachine {
         MANUAL
     }           m_state = State::INIT;
     Position    m_current_pos = Position::NEUTRAL;
+    Position    m_latest_pos = Position::NEUTRAL;
     Position    m_target_pos = Position::NEUTRAL;
     bool        m_pos_changed = false;
     int         m_manual_deg = -1;

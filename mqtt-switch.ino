@@ -24,8 +24,7 @@ PubSubClient            mqtt_client(MQTT_BROKER, MQTT_PORT, yun_client);
 DynamicJsonDocument     json_buffer(MQTT_JSON_BUFFER);
 Timer                   mqtt_reconnect_timer(MQTT_RECONNECT_TIMEOUT);
 
-MotorStateMachine       state_machine(SERVO_PIN, SERVO_POS_NEUTRAL_DEG, SERVO_POS_TOP_DEG, SERVO_POS_BOTTOM_DEG);
-MotorStateMachine::Position latest_cmd = MotorStateMachine::Position::NEUTRAL;
+ServoStateMachine       state_machine(SERVO_PIN, SERVO_POS_NEUTRAL_DEG, SERVO_POS_TOP_DEG, SERVO_POS_BOTTOM_DEG);
 DebouncedSwitch         button(BUTTON_PIN, BUTTON_DEBOUNCE_MS, BUTTON_USE_PULLUP);
 bool                    latest_cmd_by_mqtt = false;
 
@@ -55,10 +54,11 @@ void loop() {
         digitalWrite(LED_PIN, ((mqtt_reconnect_timer.getElapsedTime() % freq) < freq / 2) ? HIGH : LOW);
 
         if (mqtt_reconnect_timer.checkAndRestart()) {
+            digitalWrite(LED_PIN, HIGH);
             if (mqttConnect()) {
                 mqtt_reconnect_timer.reset();
-                setLed();
             }
+            digitalWrite(LED_PIN, LOW);
         }
     }
 
@@ -73,7 +73,7 @@ void loop() {
     if (button.hasChanged() && button.isClosed()) {
         Serial.println(F("Button was pressed."));
         latest_cmd_by_mqtt = false;
-        if (latest_cmd == MotorStateMachine::Position::TOP) {
+        if (state_machine.getLatestPos() == ServoStateMachine::Position::TOP) {
             setServoBottom();
         } else {
             setServoTop();
@@ -112,19 +112,19 @@ void onStateChanged() {
         json_buffer["actual"] = "neutral";
         json_buffer["latest"] = "unknown";
         json_buffer["trigger"] = "unknown";
-        switch (state_machine.getPos()) {
-            case MotorStateMachine::Position::TOP:
+        switch (state_machine.getCurrentPos()) {
+            case ServoStateMachine::Position::TOP:
                 json_buffer["actual"] = "top";
                 break;
-            case MotorStateMachine::Position::BOTTOM:
+            case ServoStateMachine::Position::BOTTOM:
                 json_buffer["actual"] = "bottom";
                 break;
         }
-        switch (latest_cmd) {
-            case MotorStateMachine::Position::TOP:
+        switch (state_machine.getLatestPos()) {
+            case ServoStateMachine::Position::TOP:
                 json_buffer["latest"] = "top";
                 break;
-            case MotorStateMachine::Position::BOTTOM:
+            case ServoStateMachine::Position::BOTTOM:
                 json_buffer["latest"] = "bottom";
                 break;
         }
@@ -185,8 +185,7 @@ bool mqttConnect() {
 }
 
 void setServoTop() {
-    if (state_machine.setPos(MotorStateMachine::Position::TOP)) {
-        latest_cmd = MotorStateMachine::Position::TOP;
+    if (state_machine.setPos(ServoStateMachine::Position::TOP)) {
         Serial.println(F("Turning servo to position 'top'."));
     } else {
         Serial.println(F("State machine is busy! Not doing anything."));
@@ -194,8 +193,7 @@ void setServoTop() {
 }
 
 void setServoBottom() {
-    if (state_machine.setPos(MotorStateMachine::Position::BOTTOM)) {
-        latest_cmd = MotorStateMachine::Position::BOTTOM;
+    if (state_machine.setPos(ServoStateMachine::Position::BOTTOM)) {
         Serial.println(F("Turning servo to position 'bottom'."));
     } else {
         Serial.println(F("State machine is busy! Not doing anything."));
@@ -209,5 +207,6 @@ void setServoToPos(const int pos) {
 }
 
 void setLed() {
-    digitalWrite(LED_PIN, ((latest_cmd == MotorStateMachine::Position::BOTTOM) ^ LED_ON_TOP) ? HIGH : LOW);
+    bool is_bottom = state_machine.getLatestPos() == ServoStateMachine::Position::BOTTOM;
+    digitalWrite(LED_PIN, (is_bottom ^ LED_ON_TOP) ? HIGH : LOW);
 }
