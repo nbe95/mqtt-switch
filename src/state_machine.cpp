@@ -1,8 +1,8 @@
 // Copyright (c) 2023 Niklas Bettgen
 
-#define INIT_TIMEOUT        3000
-#define SWITCH_TIMEOUT_MS   1500
-#define ATTACH_TIMEOUT_MS   200
+#define INIT_TIMEOUT        2000
+#define SWITCH_TIMEOUT_MS   250
+#define ATTACH_TIMEOUT_MS   250
 
 #define SERVO_MIN_DEG       0
 #define SERVO_MAX_DEG       180
